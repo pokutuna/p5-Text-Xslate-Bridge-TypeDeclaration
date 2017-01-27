@@ -1,0 +1,6 @@
+name = "Text-Xslate-Bridge-TypeDeclaration"
+# badges = ["travis"]
+authority="cpan:POKUTUNA"
+
+module_maker="ModuleBuildTiny"
+
