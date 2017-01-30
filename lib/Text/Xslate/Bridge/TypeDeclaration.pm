@@ -4,7 +4,7 @@ use warnings;
 use parent qw(Text::Xslate::Bridge);
 
 use Carp qw(croak);
-use Data::Printer;
+use Data::Dumper;
 use List::Util qw(all);
 use Mouse::Util::TypeConstraints;;
 use Text::Xslate qw(mark_raw);
@@ -14,15 +14,6 @@ our $VERSION = '0.01';
 # Set truthy value to skip validation for local scope.
 our $DISABLE_VALIDATION = 0;
 
-our $DATA_PRINTER_OPTS = {
-    hash_separator => '=>',
-    colored        => 0,
-    multiline      => 0,
-    max_depth      => 2,
-    show_unicode   => 1,
-    class          => { show_methods => 'none' },
-};
-
 our $IMPORT_DEFAULT_ARGS = {
     method      => 'declare',
     validate    => 1,
@@ -30,8 +21,9 @@ our $IMPORT_DEFAULT_ARGS = {
     print       => 'html',
 };
 
-sub import {
-    my $class = shift;
+sub export_into_xslate {
+    my $class     = shift;
+    my $funcs_ref = shift;
 
     my $args = @_ == 1 ? shift : { @_ };
     croak sprintf '%s can receive either a hash or a hashref.', $class
@@ -42,25 +34,33 @@ sub import {
     }
 
     $class->bridge(function => { $args->{method} => $class->_declare_func($args)});
+    $class->SUPER::export_into_xslate($funcs_ref, @_);
 }
 
 sub _declare_func {
     my ($class, $args) = @_;
 
     return sub {
-        return if $DISABLE_VALIDATION && !$args->{validate};
+        return if $DISABLE_VALIDATION || !$args->{validate};
 
         while (my ($key, $declaration) = splice(@_, 0, 2)) {
-            my $value = Text::Xslate->current_vars->{$key};
             my $type = _type($declaration);
+            my $value = Text::Xslate->current_vars->{$key};
 
             unless ($type->check($value)) {
+                local $Data::Dumper::Terse    = 1;
+                local $Data::Dumper::Indent   = 0;
+                local $Data::Dumper::Maxdepth = 2;
+
                 my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n  value: %s\n",
-                    $key, np($declaration, $DATA_PRINTER_OPTS), np($value, $DATA_PRINTER_OPTS);
+                    $key, Dumper($declaration), Dumper($value);
+
                 _print($msg, $args->{print}) if $args->{print};
                 $args->{on_mismatch}->($msg) if ref($args->{on_mismatch}) eq 'CODE';
             }
         };
+
+        return;
     };
 }
 
@@ -100,12 +100,12 @@ sub _array_structure {
 
 sub _print {
     my ($msg, $format) = @_;
-    return $format eq 'none';
+    return if $format eq 'none';
 
     Text::Xslate->print(
-        $format eq 'html' ? mark_raw('<pre class="type-declaration-mismatch">') : "\n",
-        @_,
-        $format eq 'html' ? mark_raw('</pre>') : "\n",
+        ($format eq 'html' ? mark_raw('<pre class="type-declaration-mismatch">' . "\n") : ()),
+        $msg,
+        ($format eq 'html' ? mark_raw('</pre>' . "\n") : ()),
     );
 }
 
