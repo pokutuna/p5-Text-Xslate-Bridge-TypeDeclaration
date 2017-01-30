@@ -1,13 +1,116 @@
 package Text::Xslate::Bridge::TypeDeclaration;
-use 5.008001;
 use strict;
 use warnings;
+use parent qw(Text::Xslate::Bridge);
 
-our $VERSION = "0.01";
+use Carp qw(croak);
+use Data::Printer;
+use List::Util qw(all);
+use Mouse::Util::TypeConstraints;;
+use Text::Xslate qw(mark_raw);
 
+our $VERSION = '0.01';
 
+# Set truthy value to skip validation for local scope.
+our $DISABLE_VALIDATION = 0;
+
+our $DATA_PRINTER_OPTS = {
+    hash_separator => '=>',
+    colored        => 0,
+    multiline      => 0,
+    max_depth      => 2,
+    show_unicode   => 1,
+    class          => { show_methods => 'none' },
+};
+
+our $IMPORT_DEFAULT_ARGS = {
+    method      => 'declare',
+    validate    => 1,
+    on_mismatch => \&CORE::die,
+    print       => 'html',
+};
+
+sub import {
+    my $class = shift;
+
+    my $args = @_ == 1 ? shift : { @_ };
+    croak sprintf '%s can receive either a hash or a hashref.', $class
+        unless ref $args && ref($args) eq 'HASH';
+
+    for my $key (keys %$IMPORT_DEFAULT_ARGS) {
+        $args->{$key} = $IMPORT_DEFAULT_ARGS->{$key} unless defined $args->{$key};
+    }
+
+    $class->bridge(function => { $args->{method} => $class->_declare_func($args)});
+}
+
+sub _declare_func {
+    my ($class, $args) = @_;
+
+    return sub {
+        return if $DISABLE_VALIDATION && !$args->{validate};
+
+        while (my ($key, $declaration) = splice(@_, 0, 2)) {
+            my $value = Text::Xslate->current_vars->{$key};
+            my $type = _type($declaration);
+
+            unless ($type->check($value)) {
+                my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n  value: %s\n",
+                    $key, np($declaration, $DATA_PRINTER_OPTS), np($value, $DATA_PRINTER_OPTS);
+                _print($msg, $args->{print}) if $args->{print};
+                $args->{on_mismatch}->($msg) if ref($args->{on_mismatch}) eq 'CODE';
+            }
+        };
+    };
+}
+
+# returns: Mouse::Meta::TypeConstraint
+sub _type {
+    my ($name_or_structure) = @_;
+
+    return subtype 'Any' => where { '' }
+        if !defined $name_or_structure || $name_or_structure eq '';
+
+    if (my $ref = ref $name_or_structure) {
+        return _hash_structure($name_or_structure)  if $ref eq 'HASH';
+        return _array_structure($name_or_structure) if $ref eq 'ARRAY';
+        return subtype 'Any' => where { '' };
+    } else {
+        return Mouse::Util::TypeConstraints::find_or_create_isa_type_constraint(
+            $name_or_structure
+        );
+    }
+}
+
+sub _hash_structure {
+    my ($hash) = @_;
+    subtype 'HashRef'=> where {
+        my $var = $_;
+        all { exists $var->{$_} && _type($hash->{$_})->check($var->{$_}) } keys %$hash;
+    };
+}
+
+sub _array_structure {
+    my ($ary) = @_;
+    subtype 'ArrayRef'=> where {
+        my $var = $_;
+        @$var == @$ary && all { _type($ary->[$_])->check($var->[$_]) } (0..$#$ary)
+    };
+}
+
+sub _print {
+    my ($msg, $format) = @_;
+    return $format eq 'none';
+
+    Text::Xslate->print(
+        $format eq 'html' ? mark_raw('<pre class="type-declaration-mismatch">') : "\n",
+        @_,
+        $format eq 'html' ? mark_raw('</pre>') : "\n",
+    );
+}
 
 1;
+
 __END__
 
 =encoding utf-8
@@ -19,6 +122,19 @@ Text::Xslate::Bridge::TypeDeclaration - It's new $module
 =head1 SYNOPSIS
 
     use Text::Xslate::Bridge::TypeDeclaration;
+
+
+Text::Xslate->new(
+    module => [
+        'Text::Xslate::Bridge::TypeDeclaration' => [
+            # defaults
+            method      => 'declare'   # export method name
+            validate    => 1,          # flag to validate
+            print       => 'html'      # 'html', 'text', 'none'
+            on_mismatch => \&CORE::die # handler
+        ]
+    ]
+);
 
 =head1 DESCRIPTION
 
@@ -36,4 +152,3 @@ it under the same terms as Perl itself.
 pokutuna E<lt>popopopopokutuna@gmail.comE<gt>
 
 =cut
-

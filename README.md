@@ -6,6 +6,18 @@ Text::Xslate::Bridge::TypeDeclaration - It's new $module
 
     use Text::Xslate::Bridge::TypeDeclaration;
 
+Text::Xslate->new(
+    module => \[
+        'Text::Xslate::Bridge::TypeDeclaration' => \[
+            # defaults
+            method      => 'declare'   # export method name
+            validate    => 1,          # flag to validate
+            print       => 'html'      # 'html', 'text', 'none'
+            on\_mismatch => \\&CORE::die # handler
+        \]
+    \]
+);
+
 # DESCRIPTION
 
 Text::Xslate::Bridge::TypeDeclaration is ...

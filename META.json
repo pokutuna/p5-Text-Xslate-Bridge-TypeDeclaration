@@ -42,16 +42,35 @@
       },
       "runtime" : {
          "requires" : {
+            "Carp" : "0",
+            "Data::Printer" : "0",
+            "List::Util" : "0",
+            "Mouse::Util::TypeConstraints" : "0",
+            "Text::Xslate" : "0",
+            "Text::Xslate::Bridge" : "0",
             "perl" : "5.008001"
          }
       },
       "test" : {
          "requires" : {
-            "Test::More" : "0.98"
+            "Test::Fatal" : "0",
+            "Test::More" : "0.98",
+            "Test::Name::FromLine" : "0"
          }
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration/issues"
+      },
+      "homepage" : "https://github.com/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration.git",
+         "web" : "https://github.com/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration"
+      }
+   },
    "version" : "0.01",
    "x_authority" : "cpan:POKUTUNA",
    "x_serialization_backend" : "JSON::PP version 2.27300"
