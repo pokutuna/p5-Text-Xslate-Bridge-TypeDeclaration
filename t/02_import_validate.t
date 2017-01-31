@@ -31,7 +31,7 @@ subtest 'disable flag' => sub {
     );
 
     my $res;
-    my $res = $xslate->render('a.tx', { a => 'hoge' });
+    $res = $xslate->render('a.tx', { a => 'hoge' });
     like $res, qr/Declaration mismatch/;
     like $res, qr/hoge\n\z/;
 
