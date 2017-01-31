@@ -10,7 +10,7 @@ use File::Temp qw(tempdir);
 use Test::Name::FromLine;
 
 sub cache_dir {
-    tempdir(DIR => '.xslate_cache', CLEANUP => 1);
+    tempdir('.xslate_cache_XXXX', CLEANUP => 1);
 }
 
 sub path {
