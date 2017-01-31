@@ -5,6 +5,7 @@ use t::helper;
 use Test::More;
 
 use Text::Xslate;
+use Text::Xslate::Bridge::TypeDeclaration;;
 
 subtest 'import' => sub {
     my $xslate = Text::Xslate->new(
@@ -29,11 +30,14 @@ subtest 'disable flag' => sub {
         ],
     );
 
-    like $xslate->render('a.tx', {}), qr/Declaration mismatch/;
-
-    no warnings 'once';
-    local $Text::Xslate::Bridge::TypeDeclaration::DISABLE_VALIDATION = 1;
+    my $res;
     my $res = $xslate->render('a.tx', { a => 'hoge' });
+    like $res, qr/Declaration mismatch/;
+    like $res, qr/hoge\n\z/;
+
+    local $Text::Xslate::Bridge::TypeDeclaration::DISABLE_VALIDATION = 1;
+
+    $res = $xslate->render('a.tx', { a => 'hoge' });
     unlike $res, qr/Declaration mismatch/;
     is $res, "hoge\n";
 };
