@@ -86,7 +86,7 @@ sub _hash_structure {
     my ($hash) = @_;
     subtype 'HashRef'=> where {
         my $var = $_;
-        all { exists $var->{$_} && _type($hash->{$_})->check($var->{$_}) } keys %$hash;
+        all { _type($hash->{$_})->check($var->{$_}) } keys %$hash;
     };
 }
 

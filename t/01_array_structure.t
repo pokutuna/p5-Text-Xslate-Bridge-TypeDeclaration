@@ -51,16 +51,21 @@ subtest 'nested' => sub {
     );
 };
 
+subtest 'maybe' => sub {
+    ok  validate([ 'Maybe[Str]' ], [ undef ]);
+    ok !validate([ 'Maybe[Str]' ], []);
+};
+
 subtest 'empty' => sub {
     ok  validate([], []);
-    ok  validate([], [ () ]);
     ok !validate([], [ undef ]);
 };
 
 subtest 'recursive' => sub {
-    local $TODO = 'todo';
-    my $part; $part = [ 'Int', $part ];
+    my $part = [ 'Int' ];
+    push @$part, $part;
     ok !validate($part, [ 1, [ 2 ] ]);
+    undef $part;
 };
 
 done_testing;

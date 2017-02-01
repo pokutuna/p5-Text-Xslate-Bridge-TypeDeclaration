@@ -33,11 +33,11 @@ is $xslate->render('two.tx', { h => { s => 'hoge' } }),
 is $xslate->render('two.tx', { h => { s => undef } }),
     "i:, h.s:\n";
 
-is $xslate->render('two.tx', { h => {} }), <<EOS;
+is $xslate->render('two.tx', {}), <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `h`
   declaration: {&#39;s&#39; =&gt; &#39;Maybe[Str]&#39;}
-  value: {}
+  value: undef
 </pre>
 i:, h.s:
 EOS

@@ -48,7 +48,8 @@ subtest 'missing & extra' => sub {
         e => 'HashRef'
     }, $data);
 
-    ok !validate({ %$structure, f => 'Undef' }, $data); # extra f
+    ok !validate({ %$structure, f => 'Str' }, $data);
+    ok  validate({ %$structure, f => 'Undef' }, $data);
 };
 
 subtest 'acceptable types' => sub {
@@ -68,15 +69,29 @@ subtest 'nested' => sub {
     );
 };
 
+subtest 'maybe' => sub {
+    ok  validate({ key => 'Maybe[Int]' }, {});
+    ok  validate({ key => 'Maybe[Int]' }, { key => 123 });
+    ok  validate({ key => 'Maybe[Int]' }, { key => undef });
+    ok !validate({ key => 'Maybe[Int]' }, { key => 'hoge' });
+
+    ok !validate({ key1 => { key2 => 'Maybe[Str]' } }, {});
+    ok  validate({ key1 => { key2 => 'Maybe[Str]' } }, { key1 => {} });
+    ok !validate({ key1 => { key2 => 'Maybe[Str]' } }, { key1 => undef });
+    ok  validate({ key1 => { key2 => 'Maybe[Str]' } }, { key1 => { key2 => 'hoge'} });
+    ok  validate({ key1 => { key2 => 'Maybe[Str]' } }, { key1 => { key2 => undef } });
+};
+
 subtest 'empty' => sub {
     ok  validate({}, {});
     ok !validate({}, undef);
 };
 
 subtest 'recursive' => sub {
-    local $TODO = 'todo';
-    my $part; $part = { key => $part };
+    my $part = {};
+    $part->{key} = $part;
     ok !validate($part, { key => { key => { key => 'value' } } });
+    undef $part;
 };
 
 done_testing;
