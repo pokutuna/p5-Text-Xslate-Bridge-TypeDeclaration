@@ -22,9 +22,5 @@ sub path {
     package t::SomeModel;
     sub new { bless +{}, $_[0] };
 }
-{
-    package t::AnyModel;
-    sub new { bless +{}, $_[0] };
-}
 
 1;

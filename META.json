@@ -43,7 +43,7 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
-            "Data::Printer" : "0",
+            "Data::Dumper" : "0",
             "List::Util" : "0",
             "Mouse::Util::TypeConstraints" : "0",
             "Text::Xslate" : "0",
@@ -53,6 +53,8 @@
       },
       "test" : {
          "requires" : {
+            "Data::Section::Simple" : "0",
+            "File::Temp" : "0",
             "Test::Fatal" : "0",
             "Test::More" : "0.98",
             "Test::Name::FromLine" : "0"
