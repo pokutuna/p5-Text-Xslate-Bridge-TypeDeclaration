@@ -36,7 +36,9 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
 # DESCRIPTION
 
 Text::Xslate::Bridge::TypeDeclaration is a type validator module in [Text::Xslate](https://metacpan.org/pod/Text::Xslate) templates.
+
 The type validation of this module is base on [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints).
+
 `declare` interface was implemented with reference to [Smart::Args](https://metacpan.org/pod/Smart::Args).
 
 # DECLARATIONS
