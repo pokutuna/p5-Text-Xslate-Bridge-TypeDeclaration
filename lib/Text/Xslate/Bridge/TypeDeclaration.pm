@@ -124,28 +124,95 @@ __END__
 
 =head1 NAME
 
-Text::Xslate::Bridge::TypeDeclaration - It's new $module
+Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
 
 =head1 SYNOPSIS
 
-    use Text::Xslate::Bridge::TypeDeclaration;
+    my $xslate = Text::Xslate->new(
+        module => [ 'Text::Xslate::Bridge::TypeDeclaration' ],
+    );
+
+    # @@ template.tx
+    # <:- declare(name => 'Str', engine => 'Text::Xslate') -:>
+    # <: $name :> version is <: $engine.VERSION :>.
+
+    # Success!
+    $xslate->render('template.tx', {
+        name   => 'Text::Xslate',
+        engine => $xslate
+    });
+    # Text::Xslate version is 3.4.0.
 
 
-Text::Xslate->new(
-    module => [
-        'Text::Xslate::Bridge::TypeDeclaration' => [
-            # defaults
-            method      => 'declare' # method name to export
-            validate    => 1,        # enable validation when truthy
-            print       => 'html'    # 'html', 'text', 'none'
-            on_mismatch => 'die'     # 'die', 'warn', 'none'
-        ]
-    ]
-);
+    # A string 'TT' is not isa 'Text::Xslate'
+    $xslate->render('template.tx', {
+        name   => 'Text::Xslate',
+        engine => $xslate
+    });
+    # <pre class="type-declaration-mismatch">
+    # Declaration mismatch for `engine`
+    #   declaration: 'Text::Xslate'
+    #         value: 'TT'
+    # </pre>
+    # Template::Toolkit version is .
 
 =head1 DESCRIPTION
 
-Text::Xslate::Bridge::TypeDeclaration is ...
+Text::Xslate::Bridge::TypeDeclaration is a type validator module in L<Text::Xslate> templates.
+The type validation of this module is base on L<Mouse::Util::TypeConstraints>.
+C<< declare >> interface was implemented with reference to L<Smart::Args>.
+
+=head1 DECLARATIONS
+
+=head2 Mouse Defaults
+
+- These are provided by L<Mouse::Util::TypeConstraints>.
+- C<< declare(name => 'Str') >>
+- C<< declare(user_ids => 'ArrayRef[Int]') >>
+
+
+=head2 Object
+
+- These are defined by C<< find_or_create_isa_type_constraint >> when declared.
+- C<< declare(engine => 'Text::Xslate') >>
+- C<< declare(visitor => 'Maybe[My::Model::UserAccount]') >>
+
+
+=head2 Hashref
+
+- These validate a hashref structure recursively.
+- This is a B< partial > match. Less value is error. Extra value is ignored.
+- C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' })>>
+- C<< declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' })>>
+
+
+=head2 Arrayref
+
+- These validate a arrayref structure recursively.
+- This is a B< exact > match. All items and length will be validated.
+- C<< declare(pair => [ 'My::UserAccount', 'My::UserAccount' ]) >>
+- C<< declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ]) >>
+
+
+=head1 OPTIONS
+
+    Text::Xslate->new(
+        module => [
+            'Text::Xslate::Bridge::TypeDeclaration' => [
+                # defaults
+                method      => 'declare', # method name to export
+                validate    => 1,         # enable validation when truthy
+                print       => 'html',    # error output format ('html', 'text' or 'none')
+                on_mismatch => 'die',     # error handler ('die', 'warn' or 'none')
+            ]
+        ]
+    );
+
+=head1 SEE ALSO
+
+L<Mouse::Util::TypeConstraints>
+L<Smart::Args>
+L<Text::Xslate>
 
 =head1 LICENSE
 
