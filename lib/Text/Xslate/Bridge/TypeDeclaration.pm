@@ -182,8 +182,8 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 - These validate a hashref structure recursively.
 - This is a B< partial > match. Less value is error. Extra value is ignored.
-- C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' })>>
-- C<< declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' })>>
+- C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' }) >>
+- C<< declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' }) >>
 
 
 =head2 Arrayref

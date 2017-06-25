@@ -29,3 +29,6 @@ cover_db/
 MYMETA.*
 
 /Text-Xslate-Bridge-TypeDeclaration-*
+/.build
+!Build/
+!META.json

@@ -55,7 +55,17 @@ The type validation of this module is base on [Mouse::Util::TypeConstraints](htt
 
 ## Hashref
 
+\- These validate a hashref structure recursively.
+\- This is a ** partial ** match. Less value is error. Extra value is ignored.
+\- `declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' })`
+\- `declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' })`
+
 ## Arrayref
+
+\- These validate a arrayref structure recursively.
+\- This is a ** exact ** match. All items and length will be validated.
+\- `declare(pair => [ 'My::UserAccount', 'My::UserAccount' ])`
+\- `declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ])`
 
 # OPTIONS
 
