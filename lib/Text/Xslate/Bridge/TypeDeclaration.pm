@@ -102,11 +102,11 @@ sub _print {
     my ($msg, $format) = @_;
     return if $format eq 'none';
 
-    Text::Xslate->print(
-        ($format eq 'html' ? mark_raw('<pre class="type-declaration-mismatch">' . "\n") : ()),
-        $msg,
-        ($format eq 'html' ? mark_raw('</pre>' . "\n") : ()),
-    );
+    my @outputs = $format eq 'html'
+        ? (mark_raw("<pre class=\"type-declaration-mismatch\">\n"), $msg, mark_raw("</pre>\n"))
+        : (mark_raw($msg));
+
+    Text::Xslate->print(@outputs);
 }
 
 sub _on_mismatch {
