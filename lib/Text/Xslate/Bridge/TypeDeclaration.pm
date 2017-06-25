@@ -17,8 +17,8 @@ our $DISABLE_VALIDATION = 0;
 our $IMPORT_DEFAULT_ARGS = {
     method      => 'declare',
     validate    => 1,
-    on_mismatch => \&CORE::die,
     print       => 'html',
+    on_mismatch => 'die', # Cannot give a subroutine reference.
 };
 
 sub export_into_xslate {
@@ -52,11 +52,11 @@ sub _declare_func {
                 local $Data::Dumper::Indent   = 0;
                 local $Data::Dumper::Maxdepth = 2;
 
-                my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n  value: %s\n",
+                my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n        value: %s\n",
                     $key, Dumper($declaration), Dumper($value);
 
-                _print($msg, $args->{print}) if $args->{print};
-                $args->{on_mismatch}->($msg) if ref($args->{on_mismatch}) eq 'CODE';
+                _print($msg, $args->{print});
+                _on_mismatch($msg, $args->{on_mismatch});
             }
         };
 
@@ -109,6 +109,13 @@ sub _print {
     );
 }
 
+sub _on_mismatch {
+    my ($msg, $func) = @_;
+    return if $func eq 'none';
+
+    $func eq 'warn' ? warn $msg : die $msg;
+}
+
 1;
 
 __END__
@@ -128,10 +135,10 @@ Text::Xslate->new(
     module => [
         'Text::Xslate::Bridge::TypeDeclaration' => [
             # defaults
-            method      => 'declare'   # export method name
-            validate    => 1,          # flag to validate
-            print       => 'html'      # 'html', 'text', 'none'
-            on_mismatch => \&CORE::die # handler
+            method      => 'declare' # method name to export
+            validate    => 1,        # enable validation when truthy
+            print       => 'html'    # 'html', 'text', 'none'
+            on_mismatch => 'die'     # 'die', 'warn', 'none'
         ]
     ]
 );
