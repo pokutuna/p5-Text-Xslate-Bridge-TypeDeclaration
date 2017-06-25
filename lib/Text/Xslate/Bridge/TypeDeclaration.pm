@@ -233,9 +233,15 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head1 SEE ALSO
 
-L<Mouse::Util::TypeConstraints>
-L<Smart::Args>
-L<Text::Xslate>
+=over
+
+=item L<Mouse::Util::TypeConstraints>
+
+=item L<Smart::Args>
+
+=item L<Text::Xslate>
+
+=back
 
 =head1 LICENSE
 

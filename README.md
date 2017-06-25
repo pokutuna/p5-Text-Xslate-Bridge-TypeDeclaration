@@ -83,9 +83,9 @@ The type validation of this module is base on [Mouse::Util::TypeConstraints](htt
 
 # SEE ALSO
 
-[Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints)
-[Smart::Args](https://metacpan.org/pod/Smart::Args)
-[Text::Xslate](https://metacpan.org/pod/Text::Xslate)
+- [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints)
+- [Smart::Args](https://metacpan.org/pod/Smart::Args)
+- [Text::Xslate](https://metacpan.org/pod/Text::Xslate)
 
 # LICENSE
 
