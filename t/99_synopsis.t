@@ -15,13 +15,10 @@ my $xslate = Text::Xslate->new(
     ],
 );
 
-is $xslate->render('template.tx', {
+like $xslate->render('template.tx', {
     name   => 'Text::Xslate',
     engine => $xslate,
-}), <<EOS;
-Text::Xslate version is 3.4.0.
-EOS
-
+}), qr/Text::Xslate version is/;
 
 is $xslate->render('template.tx', {
     name   => 'Template::Toolkit',

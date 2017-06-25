@@ -166,32 +166,55 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head2 Mouse Defaults
 
-- These are provided by L<Mouse::Util::TypeConstraints>.
-- C<< declare(name => 'Str') >>
-- C<< declare(user_ids => 'ArrayRef[Int]') >>
+=over 4
 
+=item These are provided by L<Mouse::Util::TypeConstraints>.
+
+=item C<< declare(name => 'Str') >>
+
+=item C<< declare(user_ids => 'ArrayRef[Int]') >>
+
+=back
 
 =head2 Object
 
-- These are defined by C<< find_or_create_isa_type_constraint >> when declared.
-- C<< declare(engine => 'Text::Xslate') >>
-- C<< declare(visitor => 'Maybe[My::Model::UserAccount]') >>
+=over 4
 
+=item These are defined by C<< find_or_create_isa_type_constraint >> when declared.
+
+=item C<< declare(engine => 'Text::Xslate') >>
+
+=item C<< declare(visitor => 'Maybe[My::Model::UserAccount]') >>
+
+=back
 
 =head2 Hashref
 
-- These validate a hashref structure recursively.
-- This is a B< partial > match. Less value is error. Extra value is ignored.
-- C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' }) >>
-- C<< declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' }) >>
+=over 4
 
+=item These validate a hashref structure recursively.
+
+=item This is a B< partial > match. Less value is error. Extra value is ignored.
+
+=item C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' }) >>
+
+=item C<< declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' }) >>
+
+=back
 
 =head2 Arrayref
 
-- These validate a arrayref structure recursively.
-- This is a B< exact > match. All items and length will be validated.
-- C<< declare(pair => [ 'My::UserAccount', 'My::UserAccount' ]) >>
-- C<< declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ]) >>
+=over 4
+
+=item These validate a arrayref structure recursively.
+
+=item This is a B< exact > match. All items and length will be validated.
+
+=item C<< declare(pair => [ 'My::UserAccount', 'My::UserAccount' ]) >>
+
+=item C<< declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ]) >>
+
+=back
 
 
 =head1 OPTIONS
