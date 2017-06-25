@@ -1,7 +1,8 @@
 use strict;
 use warnings;
-use t::helper;
+use lib '.';
 
+use t::helper;
 use Test::More;
 
 use Text::Xslate;

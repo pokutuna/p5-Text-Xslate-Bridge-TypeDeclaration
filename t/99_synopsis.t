@@ -1,9 +1,9 @@
 use strict;
 use warnings;
+use lib '.';
 use t::helper;
 
 use Test::More;
-
 use Text::Xslate;
 
 my $xslate = Text::Xslate->new(
