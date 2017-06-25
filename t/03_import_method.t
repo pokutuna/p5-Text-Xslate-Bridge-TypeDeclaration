@@ -37,7 +37,7 @@ my $xslate = Text::Xslate->new(
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `num`
   declaration: &#39;Int&#39;
-  value: &#39;hoge&#39;
+        value: &#39;hoge&#39;
 </pre>
 hoge
 EOS

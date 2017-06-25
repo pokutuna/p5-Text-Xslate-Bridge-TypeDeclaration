@@ -19,7 +19,7 @@ is $xslate->render('one.tx', { name => 'chino', age => 'tippy' }), <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `age`
   declaration: &#39;Int&#39;
-  value: &#39;tippy&#39;
+        value: &#39;tippy&#39;
 </pre>
 chino(tippy)
 EOS
@@ -37,7 +37,7 @@ is $xslate->render('two.tx', {}), <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `h`
   declaration: {&#39;s&#39; =&gt; &#39;Maybe[Str]&#39;}
-  value: undef
+        value: undef
 </pre>
 i:, h.s:
 EOS
