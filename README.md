@@ -83,10 +83,44 @@ The type validation of this module is base on [Mouse::Util::TypeConstraints](htt
         ]
     );
 
+# APPENDIX
+
+## Disable Validation on Production
+
+Perhaps you want to disable validation in production to prevent spoiling performance.
+
+    Text::Xslate->new(
+        module => [
+            'Text::Xslate::Bridge::TypeDeclaration' => [
+                validate => $ENV{PLACK_ENV} ne 'production',
+            ],
+        ],
+    );
+
+## Use `type-declaration-mismatch` class name
+
+Highlight by css
+
+    .type-declaration-mismatch { color: crimson; }
+
+Lint with [Test::WWW::Mechanize](https://metacpan.org/pod/Test::WWW::Mechanize)
+
+    # in subclass of Test::WWW::Mechanize
+    sub _lint_content_ok {
+        my ($self, $desc) = @_;
+
+        if (my $mismatch = $self->scrape_text_by_attr('class', 'type-declaration-mismatch')) {
+            $Test::Builder::Test->ok(0, $mismatch);
+        };
+
+        return $self->SUPER::_lint_content_ok($desc);
+    }
+
 # SEE ALSO
 
 - [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints)
 - [Smart::Args](https://metacpan.org/pod/Smart::Args)
+- [Test::WWW::Mechanize](https://metacpan.org/pod/Test::WWW::Mechanize)
 - [Text::Xslate](https://metacpan.org/pod/Text::Xslate)
 
 # LICENSE

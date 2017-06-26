@@ -233,6 +233,41 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
         ]
     );
 
+
+=head1 APPENDIX
+
+=head2 Disable Validation on Production
+
+Perhaps you want to disable validation in production to prevent spoiling performance.
+
+    Text::Xslate->new(
+        module => [
+            'Text::Xslate::Bridge::TypeDeclaration' => [
+                validate => $ENV{PLACK_ENV} ne 'production',
+            ],
+        ],
+    );
+
+=head2 Use C<< type-declaration-mismatch >> class name
+
+Highlight by css
+
+    .type-declaration-mismatch { color: crimson; }
+
+
+Lint with L<Test::WWW::Mechanize>
+
+    # in subclass of Test::WWW::Mechanize
+    sub _lint_content_ok {
+        my ($self, $desc) = @_;
+
+        if (my $mismatch = $self->scrape_text_by_attr('class', 'type-declaration-mismatch')) {
+            $Test::Builder::Test->ok(0, $mismatch);
+        };
+
+        return $self->SUPER::_lint_content_ok($desc);
+    }
+
 =head1 SEE ALSO
 
 =over
@@ -240,6 +275,8 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 =item L<Mouse::Util::TypeConstraints>
 
 =item L<Smart::Args>
+
+=item L<Test::WWW::Mechanize>
 
 =item L<Text::Xslate>
 
