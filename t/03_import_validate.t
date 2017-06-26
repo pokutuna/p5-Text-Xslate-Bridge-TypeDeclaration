@@ -6,6 +6,7 @@ use t::helper;
 use Test::More;
 
 use Text::Xslate;
+use Text::Xslate::Bridge::TypeDeclaration;
 
 subtest 'import' => sub {
     my $xslate = Text::Xslate->new(
