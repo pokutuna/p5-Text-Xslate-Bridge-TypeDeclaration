@@ -139,15 +139,15 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
     # Success!
     $xslate->render('template.tx', {
         name   => 'Text::Xslate',
-        engine => $xslate
+        engine => $xslate,
     });
     # Text::Xslate version is 3.4.0.
 
 
     # A string 'TT' is not isa 'Text::Xslate'
     $xslate->render('template.tx', {
-        name   => 'Text::Xslate',
-        engine => $xslate
+        name   => 'Template::Toolkit',
+        engine => 'TT',
     });
     # <pre class="type-declaration-mismatch">
     # Declaration mismatch for `engine`
@@ -238,7 +238,7 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head2 Disable Validation on Production
 
-Perhaps you want to disable validation in production to prevent spoiling performance.
+Perhaps you want to disable validation in production to prevent spoiling performance on a L<Plack> application.
 
     Text::Xslate->new(
         module => [
