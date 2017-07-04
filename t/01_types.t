@@ -6,21 +6,23 @@ use t::helper;
 use Test::More;
 
 use Text::Xslate::Bridge::TypeDeclaration;
+use Text::Xslate::Bridge::TypeDeclaration::Registry;
 
 *_type = \&Text::Xslate::Bridge::TypeDeclaration::_type;
 
 sub validate {
     my ($structure, $data) = @_;
-    return _type($structure)->check($data);
+    my $reg = Text::Xslate::Bridge::TypeDeclaration::Registry->new;
+    return _type($structure, $reg)->check($data);
 }
 
-subtest 'returns Mouse::Meta::TypeConstraint' => sub {
-    ok _type('Str')->isa('Mouse::Meta::TypeConstraint');
-    ok _type('Maybe[Str]')->isa('Mouse::Meta::TypeConstraint');
-    ok _type([ 'Int', 'Str' ])->isa('Mouse::Meta::TypeConstraint');
-    ok _type({ key => 'Str' })->isa('Mouse::Meta::TypeConstraint');
-    ok _type(undef)->isa('Mouse::Meta::TypeConstraint');
-    ok _type(\'Hoge')->isa('Mouse::Meta::TypeConstraint');
+subtest 'returns Type::Tiny' => sub {
+    ok _type('Str')->isa('Type::Tiny');
+    ok _type('Maybe[Str]')->isa('Type::Tiny');
+    ok _type([ 'Int', 'Str' ])->isa('Type::Tiny');
+    ok _type({ key => 'Str' })->isa('Type::Tiny');
+    ok _type(undef)->isa('Type::Tiny');
+    ok _type(\'Hoge')->isa('Type::Tiny');
 };
 
 subtest 'union' => sub {

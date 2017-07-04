@@ -6,12 +6,15 @@ use t::helper;
 use Test::More;
 
 use Text::Xslate::Bridge::TypeDeclaration;
+use Text::Xslate::Bridge::TypeDeclaration::Registry;
+use Carp::Always;
 
 *_hash_structure = \&Text::Xslate::Bridge::TypeDeclaration::_hash_structure;
 
 sub validate {
     my ($structure, $data) = @_;
-    return _hash_structure($structure)->check($data);
+    my $reg = Text::Xslate::Bridge::TypeDeclaration::Registry->new;
+    return _hash_structure($structure, $reg)->check($data);
 }
 
 my $data = {
@@ -29,6 +32,7 @@ my $structure = {
     d => 'Undef',
     e => { a => 'Str' },
 };
+
 
 ok  validate($structure, $data);
 ok !validate($structure, $structure);

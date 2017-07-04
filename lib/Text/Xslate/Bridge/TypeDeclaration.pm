@@ -6,8 +6,11 @@ use parent qw(Text::Xslate::Bridge);
 use Carp qw(croak);
 use Data::Dumper;
 use List::Util qw(all);
-use Mouse::Util::TypeConstraints;;
 use Text::Xslate qw(mark_raw);
+use Text::Xslate::Bridge::TypeDeclaration::Registry;
+use Type::Registry ();
+use Types::Standard qw(HashRef);
+use Type::Tiny qw();
 
 our $VERSION = '0.01';
 
@@ -15,10 +18,11 @@ our $VERSION = '0.01';
 our $DISABLE_VALIDATION = 0;
 
 our $IMPORT_DEFAULT_ARGS = {
-    method      => 'declare',
-    validate    => 1,
-    print       => 'html',
-    on_mismatch => 'die', # Cannot give a subroutine reference.
+    method         => 'declare',
+    validate       => 1,
+    print          => 'html', # TODO: Can detect Xslate compiler_option
+    registry_class => undef,  # Class name for Type::Registry to lookup types
+    on_mismatch    => 'die',  # Cannot give a subroutine reference >_<
 };
 
 sub export_into_xslate {
@@ -33,18 +37,22 @@ sub export_into_xslate {
         $args->{$key} = $IMPORT_DEFAULT_ARGS->{$key} unless defined $args->{$key};
     }
 
-    $class->bridge(function => { $args->{method} => $class->_declare_func($args)});
+    my $registry = defined $args->{registry_class}
+        ? Type::Registry->for_class($args->{registry_class})
+        : Text::Xslate::Bridge::TypeDeclaration::Registry->new;
+
+    $class->bridge(function => { $args->{method} => _declare_func($args, $registry) });
     $class->SUPER::export_into_xslate($funcs_ref, @_);
 }
 
 sub _declare_func {
-    my ($class, $args) = @_;
+    my ($args, $registry) = @_;
 
     return sub {
         return if $DISABLE_VALIDATION || !$args->{validate};
 
         while (my ($key, $declaration) = splice(@_, 0, 2)) {
-            my $type = _type($declaration);
+            my $type = _type($declaration, $registry);
             my $value = Text::Xslate->current_vars->{$key};
 
             unless ($type->check($value)) {
@@ -56,7 +64,7 @@ sub _declare_func {
                     $key, Dumper($declaration), Dumper($value);
 
                 _print($msg, $args->{print});
-                _on_mismatch($msg, $args->{on_mismatch});
+                last if _on_mismatch($msg, $args->{on_mismatch});
             }
         };
 
@@ -64,38 +72,43 @@ sub _declare_func {
     };
 }
 
-# returns: Mouse::Meta::TypeConstraint
+# This treats unknown type as a declaration error.
+sub _get_invalid_type {
+    my ($name) = @_;
+
+    return Type::Tiny->new(
+        constraint => sub { },
+        message    => sub { "\"$name\" is not a known type" },
+    );
+}
+
+# returns: Type::Tiny
 sub _type {
-    my ($name_or_structure) = @_;
+    my ($name_or_struct, $registry) = @_;
 
-    return subtype 'Any' => where { '' }
-        if !defined $name_or_structure || $name_or_structure eq '';
+    return _get_invalid_type($name_or_struct)
+        if !defined $name_or_struct || $name_or_struct eq '';
 
-    if (my $ref = ref $name_or_structure) {
-        return _hash_structure($name_or_structure)  if $ref eq 'HASH';
-        return _array_structure($name_or_structure) if $ref eq 'ARRAY';
-        return subtype 'Any' => where { '' };
+    if (my $ref = ref $name_or_struct) {
+        return _hash_structure($name_or_struct, $registry) if $ref eq 'HASH';
+        return _get_invalid_type($name_or_struct);
     } else {
-        return Mouse::Util::TypeConstraints::find_or_create_isa_type_constraint(
-            $name_or_structure
-        );
+        my $type = eval { $registry->lookup($name_or_struct) };
+        return ($type && $type->can('check')) ? $type : _get_invalid_type($name_or_struct);
     }
 }
 
 sub _hash_structure {
-    my ($hash) = @_;
-    subtype 'HashRef'=> where {
-        my $var = $_;
-        all { _type($hash->{$_})->check($var->{$_}) } keys %$hash;
-    };
-}
+    my ($hash, $registry) = @_;
 
-sub _array_structure {
-    my ($ary) = @_;
-    subtype 'ArrayRef'=> where {
-        my $var = $_;
-        @$var == @$ary && all { _type($ary->[$_])->check($var->[$_]) } (0..$#$ary)
-    };
+    # This likes Dict[... slurpy Any]
+    return Type::Tiny->new(
+        parent     => HashRef,
+        constraint => sub {
+            my $var = $_;
+            all { _type($hash->{$_}, $registry)->check($var->{$_}) } keys %$hash;
+        }
+    );
 }
 
 sub _print {
@@ -111,9 +124,18 @@ sub _print {
 
 sub _on_mismatch {
     my ($msg, $func) = @_;
-    return if $func eq 'none';
 
-    $func eq 'warn' ? warn $msg : die $msg;
+    my $h = +{
+        die  => [ 'die_handler',  1 ],
+        warn => [ 'warn_handler', 0 ],
+        none => [ undef,          0 ]
+    }->{$func};
+
+    if ($h->[0]) {
+        my $handler = Text::Xslate->current_engine->{$h->[0]};
+        $handler->($msg) if $handler;
+    }
+    return $h->[1];
 }
 
 1;
