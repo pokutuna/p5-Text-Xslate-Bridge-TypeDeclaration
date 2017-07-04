@@ -7,7 +7,6 @@ use Test::More;
 
 use Text::Xslate::Bridge::TypeDeclaration;
 use Text::Xslate::Bridge::TypeDeclaration::Registry;
-use Carp::Always;
 
 *_hash_structure = \&Text::Xslate::Bridge::TypeDeclaration::_hash_structure;
 

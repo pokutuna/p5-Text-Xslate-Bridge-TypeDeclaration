@@ -10,8 +10,6 @@ use Text::Xslate;
 my $warned = 0;
 my $died   = 0;
 
-use DDP { show_unicode => 1, use_prototypes => 0 };
-
 my %common_args = (
     path         => path,
     cache_dir    => cache_dir,
