@@ -9,7 +9,7 @@ use List::Util qw(all);
 use Text::Xslate qw(mark_raw);
 use Text::Xslate::Bridge::TypeDeclaration::Registry;
 use Type::Registry ();
-use Types::Standard qw(HashRef);
+use Types::Standard qw(Any Dict slurpy);
 use Type::Tiny qw();
 
 our $VERSION = '0.01';
@@ -101,14 +101,10 @@ sub _type {
 sub _hash_structure {
     my ($hash, $registry) = @_;
 
-    # This likes Dict[... slurpy Any]
-    return Type::Tiny->new(
-        parent     => HashRef,
-        constraint => sub {
-            my $var = $_;
-            all { _type($hash->{$_}, $registry)->check($var->{$_}) } keys %$hash;
-        }
-    );
+    return Dict[
+        (map { $_ => _type($hash->{$_}, $registry) } keys %$hash),
+        slurpy Any
+    ];
 }
 
 sub _print {
