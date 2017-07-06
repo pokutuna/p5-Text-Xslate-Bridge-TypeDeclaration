@@ -6,11 +6,12 @@ use parent qw(Text::Xslate::Bridge);
 use Carp qw(croak);
 use Data::Dumper;
 use List::Util qw(all);
+use Scalar::Util qw(blessed);
 use Text::Xslate qw(mark_raw);
 use Text::Xslate::Bridge::TypeDeclaration::Registry;
 use Type::Registry ();
-use Types::Standard qw(Any Dict slurpy);
 use Type::Tiny qw();
+use Types::Standard qw(Any Dict slurpy);
 
 our $VERSION = '0.01';
 
@@ -94,7 +95,8 @@ sub _type {
         return _get_invalid_type($name_or_struct);
     } else {
         my $type = eval { $registry->lookup($name_or_struct) };
-        return ($type && $type->can('check')) ? $type : _get_invalid_type($name_or_struct);
+        return ($type && blessed($type) && $type->can('check'))
+            ? $type : _get_invalid_type($name_or_struct);
     }
 }
 
