@@ -73,7 +73,7 @@ sub _declare_func {
     };
 }
 
-# This treats unknown type as a declaration error.
+# This treats unknown types as a declaration error.
 sub _get_invalid_type {
     my ($name) = @_;
 

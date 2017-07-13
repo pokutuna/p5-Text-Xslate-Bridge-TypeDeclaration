@@ -48,4 +48,13 @@ subtest 'undef' => sub {
     ok !validate(undef, undef);
 };
 
+subtest 'invaid' => sub {
+    ok !validate('', undef);
+    ok !validate(undef, undef);
+
+    my $type = Text::Xslate::Bridge::TypeDeclaration::_get_invalid_type('InvalidTypeName');
+    ok !$type->check('');
+    is $type->get_message(''), '"InvalidTypeName" is not a known type';
+};
+
 done_testing;

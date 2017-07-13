@@ -65,6 +65,12 @@ subtest 'My::Registry::SomeModel' => sub {
     unlike $specified->render(@arg), qr/Declaration mismatch for `value`/, 'From t::My::Registry';
 };
 
+subtest 'invalid type' => sub {
+    my @arg = ('invalid_type.tx', { value => '' });
+    like $default->render(@arg),   qr/Declaration mismatch for `value`/, 'Not aliased';
+    like $specified->render(@arg), qr/Declaration mismatch for `value`/, 'From t::My::Registry';
+};
+
 done_testing;
 
 __DATA__
@@ -82,3 +88,6 @@ __DATA__
 
 @@ aliased_somemodel.tx
 <: declare(value => 'My::Registry::SomeModel'):><: $value :>
+
+@@ invalid_type.tx
+<: declare(value => ''):><: $value :>
