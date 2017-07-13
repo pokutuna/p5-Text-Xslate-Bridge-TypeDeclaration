@@ -15,26 +15,20 @@ my $xslate = Text::Xslate->new(
     ],
 );
 
-like $xslate->render('template.tx', {
-    name   => 'Text::Xslate',
-    engine => $xslate,
-}), qr/Text::Xslate version is/;
+like $xslate->render('template.tx', { drink => 'Cocoa' }),
+    qr/May I have a cup of Cocoa\./;
 
-is $xslate->render('template.tx', {
-    name   => 'Template::Toolkit',
-    engine => 'TT',
-}), <<EOS;
+is $xslate->render('template.tx', { drink => 'Oil' }), <<EOS;
 <pre class="type-declaration-mismatch">
-Declaration mismatch for `engine`
-  declaration: &#39;Text::Xslate&#39;
-        value: &#39;TT&#39;
+Declaration mismatch for `drink`
+  Value &quot;Oil&quot; did not pass type constraint &quot;Enum[&quot;Cocoa&quot;,&quot;Cappuchino&quot;,&quot;Tea&quot;]&quot;
 </pre>
-Template::Toolkit version is .
+May I have a cup of Oil.
 EOS
 
 done_testing;
 
 __DATA__
 @@ template.tx
-<:- declare(name => 'Str', engine => 'Text::Xslate') -:>
-<: $name :> version is <: $engine.VERSION :>.
+<:- declare(drink => "Enum['Cocoa', 'Cappuchino', 'Tea']") -:>
+May I have a cup of <: $drink :>.
