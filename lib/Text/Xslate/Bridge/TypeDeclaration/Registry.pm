@@ -15,15 +15,29 @@ sub new {
 sub simple_lookup {
     my ($self, $name, $flag) = @_;
     my $type = $self->SUPER::simple_lookup($name, $flag);
-    return (!defined $type && $flag) ? $self->make_class_type($name) : $type;
+
     # Given 1 to $flag when parsing a name (undocumented)
+    return (!defined $type && $flag)
+        ? $self->_class_type($name) : $type;
 }
 
 # override
 sub foreign_lookup {
     my ($self, $name, $flag) = @_;
     my $type = $self->SUPER::foreign_lookup($name, $flag);
-    return $type ? $type : $self->make_class_type($name);
+    return $type ? $type : $self->_class_type($name);
+}
+
+sub _class_type {
+    my ($self, $name) = @_;
+
+    my $type = $self->SUPER::simple_lookup($name);
+    unless ($type) {
+        $type = $self->make_class_type($name);
+        $self->add_type($type, $name);
+    }
+
+    return $type;
 }
 
 1;

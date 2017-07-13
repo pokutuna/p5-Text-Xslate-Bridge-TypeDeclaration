@@ -76,4 +76,14 @@ subtest 'package with MouseX' => sub {
     ok !$parameterized->check(['file:///home/example', 3]);
 };
 
+subtest 'cache generated class_type' => sub {
+    my $reg = Text::Xslate::Bridge::TypeDeclaration::Registry->new;
+    is $reg->{'TopLevelName'}, undef;
+    is $reg->{'t::Model::PP'}, undef;
+
+    $reg->lookup('Dict[a => TopLevelName, b => t::Model::PP]');
+    ok $reg->{'TopLevelName'}->isa('Type::Tiny::Class');
+    ok $reg->{'t::Model::PP'}->isa('Type::Tiny::Class');
+};
+
 done_testing;
