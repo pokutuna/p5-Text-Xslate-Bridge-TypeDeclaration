@@ -1,7 +1,6 @@
 requires 'perl', '5.008001';
 
 requires 'Carp';
-requires 'Data::Dumper';
 requires 'List::Util';
 requires 'Scalar::Util';
 requires 'Text::Xslate';
