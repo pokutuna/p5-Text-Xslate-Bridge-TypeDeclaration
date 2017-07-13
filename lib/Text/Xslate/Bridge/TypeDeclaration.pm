@@ -21,9 +21,9 @@ our $DISABLE_VALIDATION = 0;
 our $IMPORT_DEFAULT_ARGS = {
     method         => 'declare',
     validate       => 1,
-    print          => 'html', # TODO: Can detect Xslate compiler_option
-    on_mismatch    => 'die',  # Cannot give a subroutine reference >_<
-    registry_class => undef,  # Class name for Type::Registry to lookup types
+    print          => 1,
+    on_mismatch    => 'die', # Cannot give a subroutine reference >_<
+    registry_class => undef, # Class name for Type::Registry to lookup types
 };
 
 sub export_into_xslate {
@@ -64,7 +64,7 @@ sub _declare_func {
                 my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n        value: %s\n",
                     $key, Dumper($declaration), Dumper($value);
 
-                _print($msg, $args->{print});
+                _print($msg) if $args->{print};
                 last if _on_mismatch($msg, $args->{on_mismatch});
             }
         };
@@ -110,10 +110,11 @@ sub _hash_structure {
 }
 
 sub _print {
-    my ($msg, $format) = @_;
-    return if $format eq 'none';
+    my ($msg) = @_;
 
-    my @outputs = $format eq 'html'
+    my $is_html = (Text::Xslate->current_engine->{type} || '') ne 'text';
+
+    my @outputs = $is_html
         ? (mark_raw("<pre class=\"type-declaration-mismatch\">\n"), $msg, mark_raw("</pre>\n"))
         : (mark_raw($msg));
 
@@ -240,7 +241,7 @@ This is a B< slurpy > match. Less value is error. Extra values are ignored.
                 # defaults
                 method         => 'declare', # method name to export
                 validate       => 1,         # enable validation when truthy
-                print          => 'html',    # error output format ('html', 'text' or 'none')
+                print          => 1,         # enable printing errors to the output buffer when truthy
                 on_mismatch    => 'die',     # error handler ('die', 'warn' or 'none')
                 registry_class => undef,     # package name for specifying Type::Registry
             ]

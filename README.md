@@ -81,7 +81,7 @@ This is a ** slurpy ** match. Less value is error. Extra values are ignored.
                 # defaults
                 method         => 'declare', # method name to export
                 validate       => 1,         # enable validation when truthy
-                print          => 'html',    # error output format ('html', 'text' or 'none')
+                print          => 1,         # enable printing errors to the output buffer when truthy
                 on_mismatch    => 'die',     # error handler ('die', 'warn' or 'none')
                 registry_class => undef,     # package name for specifying Type::Registry
             ]

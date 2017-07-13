@@ -16,7 +16,7 @@ subtest 'html' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'html',
+                print => 1,
             ],
         ],
     );
@@ -41,7 +41,7 @@ subtest 'text' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'text',
+                print => 1,
             ],
         ],
     );
@@ -66,7 +66,7 @@ subtest 'none' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'none',
+                print => 0,
             ],
         ],
     );
