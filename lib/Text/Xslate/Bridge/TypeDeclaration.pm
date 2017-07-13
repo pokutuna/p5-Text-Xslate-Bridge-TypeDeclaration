@@ -149,28 +149,23 @@ Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xsl
     );
 
     # @@ template.tx
-    # <:- declare(name => 'Str', engine => 'Text::Xslate') -:>
-    # <: $name :> version is <: $engine.VERSION :>.
+    # <:- declare(drink => 'Enum["Cocoa", "Cappuchino", "Tea"]') -:>
+    # May I have a cup of <: $drink :>.
 
     # Success!
-    $xslate->render('template.tx', {
-        name   => 'Text::Xslate',
-        engine => $xslate,
-    });
-    # Text::Xslate version is 3.4.0.
+    $xslate->render('template.tx', { drink => 'Cocoa' });
+    # Output:
+    #   May I have a cup of Cocoa.
 
 
-    # A string 'TT' is not isa 'Text::Xslate'
-    $xslate->render('template.tx', {
-        name   => 'Template::Toolkit',
-        engine => 'TT',
-    });
-    # <pre class="type-declaration-mismatch">
-    # Declaration mismatch for `engine`
-    #   declaration: 'Text::Xslate'
-    #         value: 'TT'
-    # </pre>
-    # Template::Toolkit version is .
+    # A string 'Oil' is not a drink
+    is $xslate->render('template.tx', { drink => 'Oil' });
+    # Output:
+    #   <pre class="type-declaration-mismatch">
+    #   Declaration mismatch for `drink`
+    #     Value "Oil" did not pass type constraint "Enum["Cocoa", "Cappuchino", "Tea"]"
+    #   </pre>
+    #   May I have a cup of Oil.
 
 =head1 DESCRIPTION
 
@@ -216,7 +211,7 @@ These are defined by default L<Text::Xslate::Bridge::TypeDeclaration::Registry> 
 
 =head2 Hashref
 
-Hashref is treated as C<<Dict[... slurpy Any]>>.
+Hashref is treated as C<Dict[... slurpy Any]>.
 
 This is a B< slurpy > match. Less value is error. Extra values are ignored.
 

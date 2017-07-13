@@ -24,8 +24,7 @@ subtest 'default(html)' => sub {
     is $res, <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `a`
-  declaration: &#39;Int&#39;
-        value: &#39;hoge&#39;
+  Value &quot;hoge&quot; did not pass type constraint &quot;Int&quot;
 </pre>
 hoge
 EOS
@@ -49,8 +48,7 @@ subtest 'html' => sub {
     is $res, <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `a`
-  declaration: &#39;Int&#39;
-        value: &#39;hoge&#39;
+  Value &quot;hoge&quot; did not pass type constraint &quot;Int&quot;
 </pre>
 hoge
 EOS
@@ -73,8 +71,7 @@ subtest 'text' => sub {
     my $res = $xslate->render('a.tx', { a => "hoge" });
     is $res, <<EOS;
 Declaration mismatch for `a`
-  declaration: 'Int'
-        value: 'hoge'
+  Value "hoge" did not pass type constraint "Int"
 hoge
 EOS
 };
