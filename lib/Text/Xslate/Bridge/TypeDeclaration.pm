@@ -6,8 +6,12 @@ use parent qw(Text::Xslate::Bridge);
 use Carp qw(croak);
 use Data::Dumper;
 use List::Util qw(all);
-use Mouse::Util::TypeConstraints;;
+use Scalar::Util qw(blessed);
 use Text::Xslate qw(mark_raw);
+use Text::Xslate::Bridge::TypeDeclaration::Registry;
+use Type::Registry ();
+use Type::Tiny qw();
+use Types::Standard qw(Any Dict slurpy);
 
 our $VERSION = '0.01';
 
@@ -15,10 +19,11 @@ our $VERSION = '0.01';
 our $DISABLE_VALIDATION = 0;
 
 our $IMPORT_DEFAULT_ARGS = {
-    method      => 'declare',
-    validate    => 1,
-    print       => 'html',
-    on_mismatch => 'die', # Cannot give a subroutine reference.
+    method         => 'declare',
+    validate       => 1,
+    print          => 'html', # TODO: Can detect Xslate compiler_option
+    on_mismatch    => 'die',  # Cannot give a subroutine reference >_<
+    registry_class => undef,  # Class name for Type::Registry to lookup types
 };
 
 sub export_into_xslate {
@@ -33,18 +38,22 @@ sub export_into_xslate {
         $args->{$key} = $IMPORT_DEFAULT_ARGS->{$key} unless defined $args->{$key};
     }
 
-    $class->bridge(function => { $args->{method} => $class->_declare_func($args)});
+    my $registry = defined $args->{registry_class}
+        ? Type::Registry->for_class($args->{registry_class})
+        : Text::Xslate::Bridge::TypeDeclaration::Registry->new;
+
+    $class->bridge(function => { $args->{method} => _declare_func($args, $registry) });
     $class->SUPER::export_into_xslate($funcs_ref, @_);
 }
 
 sub _declare_func {
-    my ($class, $args) = @_;
+    my ($args, $registry) = @_;
 
     return sub {
         return if $DISABLE_VALIDATION || !$args->{validate};
 
         while (my ($key, $declaration) = splice(@_, 0, 2)) {
-            my $type = _type($declaration);
+            my $type = _type($declaration, $registry);
             my $value = Text::Xslate->current_vars->{$key};
 
             unless ($type->check($value)) {
@@ -56,7 +65,7 @@ sub _declare_func {
                     $key, Dumper($declaration), Dumper($value);
 
                 _print($msg, $args->{print});
-                _on_mismatch($msg, $args->{on_mismatch});
+                last if _on_mismatch($msg, $args->{on_mismatch});
             }
         };
 
@@ -64,38 +73,40 @@ sub _declare_func {
     };
 }
 
-# returns: Mouse::Meta::TypeConstraint
+# This treats unknown types as a declaration error.
+sub _get_invalid_type {
+    my ($name) = @_;
+
+    return Type::Tiny->new(
+        constraint => sub { },
+        message    => sub { "\"$name\" is not a known type" },
+    );
+}
+
+# returns: Type::Tiny
 sub _type {
-    my ($name_or_structure) = @_;
+    my ($name_or_struct, $registry) = @_;
 
-    return subtype 'Any' => where { '' }
-        if !defined $name_or_structure || $name_or_structure eq '';
+    return _get_invalid_type($name_or_struct)
+        if !defined $name_or_struct || $name_or_struct eq '';
 
-    if (my $ref = ref $name_or_structure) {
-        return _hash_structure($name_or_structure)  if $ref eq 'HASH';
-        return _array_structure($name_or_structure) if $ref eq 'ARRAY';
-        return subtype 'Any' => where { '' };
+    if (my $ref = ref $name_or_struct) {
+        return _hash_structure($name_or_struct, $registry) if $ref eq 'HASH';
+        return _get_invalid_type($name_or_struct);
     } else {
-        return Mouse::Util::TypeConstraints::find_or_create_isa_type_constraint(
-            $name_or_structure
-        );
+        my $type = eval { $registry->lookup($name_or_struct) };
+        return ($type && blessed($type) && $type->can('check'))
+            ? $type : _get_invalid_type($name_or_struct);
     }
 }
 
 sub _hash_structure {
-    my ($hash) = @_;
-    subtype 'HashRef'=> where {
-        my $var = $_;
-        all { _type($hash->{$_})->check($var->{$_}) } keys %$hash;
-    };
-}
+    my ($hash, $registry) = @_;
 
-sub _array_structure {
-    my ($ary) = @_;
-    subtype 'ArrayRef'=> where {
-        my $var = $_;
-        @$var == @$ary && all { _type($ary->[$_])->check($var->[$_]) } (0..$#$ary)
-    };
+    return Dict[
+        (map { $_ => _type($hash->{$_}, $registry) } keys %$hash),
+        slurpy Any
+    ];
 }
 
 sub _print {
@@ -111,9 +122,18 @@ sub _print {
 
 sub _on_mismatch {
     my ($msg, $func) = @_;
-    return if $func eq 'none';
 
-    $func eq 'warn' ? warn $msg : die $msg;
+    my $h = +{
+        die  => [ 'die_handler',  1 ],
+        warn => [ 'warn_handler', 0 ],
+        none => [ undef,          0 ]
+    }->{$func};
+
+    if ($h->[0]) {
+        my $handler = Text::Xslate->current_engine->{$h->[0]};
+        $handler->($msg) if $handler;
+    }
+    return $h->[1];
 }
 
 1;
@@ -124,7 +144,7 @@ __END__
 
 =head1 NAME
 
-Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
+Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xslate.
 
 =head1 SYNOPSIS
 
@@ -160,29 +180,37 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
 
 Text::Xslate::Bridge::TypeDeclaration is a type validator module in L<Text::Xslate> templates.
 
-The type validation of this module is base on L<Mouse::Util::TypeConstraints>.
+The type validation of this module is base on L<Type::Tiny>.
+
+L<Type::Tiny> type constraints are compatible with Moo, Moose and Mouse.
 
 C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head1 DECLARATIONS
 
-=head2 Mouse Defaults
+=head2 Types::Standard
+
+See L<Types::Standard>.
+
+These are imported by default L<Text::Xslate::Bridge::TypeDeclaration::Registry>.
+
+You can not use them unless you import L<Types::Standard> with specifying registry by C<< registry_class >> option.
 
 =over 4
-
-=item These are provided by L<Mouse::Util::TypeConstraints>.
 
 =item C<< declare(name => 'Str') >>
 
 =item C<< declare(user_ids => 'ArrayRef[Int]') >>
 
+=item C<< declare(person_hash => 'Dict[name => Str, age => Int]') >>
+
 =back
 
-=head2 Object
+=head2 Class-Type
+
+These are defined by default L<Text::Xslate::Bridge::TypeDeclaration::Registry> when a name is not found in registry.
 
 =over 4
-
-=item These are defined by C<< find_or_create_isa_type_constraint >> when declared.
 
 =item C<< declare(engine => 'Text::Xslate') >>
 
@@ -192,11 +220,11 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head2 Hashref
 
+Hashref is treated as C<<Dict[... slurpy Any]>>.
+
+This is a B< slurpy > match. Less value is error. Extra values are ignored.
+
 =over 4
-
-=item These validate a hashref structure recursively.
-
-=item This is a B< partial > match. Less value is error. Extra value is ignored.
 
 =item C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' }) >>
 
@@ -204,31 +232,17 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =back
 
-=head2 Arrayref
-
-=over 4
-
-=item These validate a arrayref structure recursively.
-
-=item This is a B< exact > match. All items and length will be validated.
-
-=item C<< declare(pair => [ 'My::UserAccount', 'My::UserAccount' ]) >>
-
-=item C<< declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ]) >>
-
-=back
-
-
 =head1 OPTIONS
 
     Text::Xslate->new(
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
                 # defaults
-                method      => 'declare', # method name to export
-                validate    => 1,         # enable validation when truthy
-                print       => 'html',    # error output format ('html', 'text' or 'none')
-                on_mismatch => 'die',     # error handler ('die', 'warn' or 'none')
+                method         => 'declare', # method name to export
+                validate       => 1,         # enable validation when truthy
+                print          => 'html',    # error output format ('html', 'text' or 'none')
+                on_mismatch    => 'die',     # error handler ('die', 'warn' or 'none')
+                registry_class => undef,     # package name for specifying Type::Registry
             ]
         ]
     );
@@ -270,17 +284,11 @@ Lint with L<Test::WWW::Mechanize>
 
 =head1 SEE ALSO
 
-=over
+L<Text::Xslate>, L<Text::Xslate::Bridge>
 
-=item L<Mouse::Util::TypeConstraints>
+L<Type::Tiny>, L<Types::Standard>, L<Type::Registry>
 
-=item L<Smart::Args>
-
-=item L<Test::WWW::Mechanize>
-
-=item L<Text::Xslate>
-
-=back
+L<Smart::Args>, L<Test::WWW::Mechanize>
 
 =head1 LICENSE
 

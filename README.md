@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration.svg?branch=master)](https://travis-ci.org/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration) [![Coverage Status](https://img.shields.io/coveralls/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration/master.svg?style=flat)](https://coveralls.io/r/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration?branch=master)
 # NAME
 
-Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
+Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xslate.
 
 # SYNOPSIS
 
@@ -16,15 +16,15 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
     # Success!
     $xslate->render('template.tx', {
         name   => 'Text::Xslate',
-        engine => $xslate
+        engine => $xslate,
     });
     # Text::Xslate version is 3.4.0.
 
 
     # A string 'TT' is not isa 'Text::Xslate'
     $xslate->render('template.tx', {
-        name   => 'Text::Xslate',
-        engine => $xslate
+        name   => 'Template::Toolkit',
+        engine => 'TT',
     });
     # <pre class="type-declaration-mismatch">
     # Declaration mismatch for `engine`
@@ -37,37 +37,41 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
 
 Text::Xslate::Bridge::TypeDeclaration is a type validator module in [Text::Xslate](https://metacpan.org/pod/Text::Xslate) templates.
 
-The type validation of this module is base on [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints).
+The type validation of this module is base on [Type::Tiny](https://metacpan.org/pod/Type::Tiny).
+
+[Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints are compatible with Moo, Moose and Mouse.
 
 `declare` interface was implemented with reference to [Smart::Args](https://metacpan.org/pod/Smart::Args).
 
 # DECLARATIONS
 
-## Mouse Defaults
+## Types::Standard
 
-- These are provided by [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints).
+See [Types::Standard](https://metacpan.org/pod/Types::Standard).
+
+These are imported by default [Text::Xslate::Bridge::TypeDeclaration::Registry](https://metacpan.org/pod/Text::Xslate::Bridge::TypeDeclaration::Registry).
+
+You can not use them unless you import [Types::Standard](https://metacpan.org/pod/Types::Standard) with specifying registry by `registry_class` option.
+
 - `declare(name => 'Str')`
 - `declare(user_ids => 'ArrayRef[Int]')`
+- `declare(person_hash => 'Dict[name => Str, age => Int]')`
 
-## Object
+## Class-Type
 
-- These are defined by `find_or_create_isa_type_constraint` when declared.
+These are defined by default [Text::Xslate::Bridge::TypeDeclaration::Registry](https://metacpan.org/pod/Text::Xslate::Bridge::TypeDeclaration::Registry) when a name is not found in registry.
+
 - `declare(engine => 'Text::Xslate')`
 - `declare(visitor => 'Maybe[My::Model::UserAccount]')`
 
 ## Hashref
 
-- These validate a hashref structure recursively.
-- This is a ** partial ** match. Less value is error. Extra value is ignored.
+Hashref is treated as `<Dict[... slurpy Any]`>.
+
+This is a ** slurpy ** match. Less value is error. Extra values are ignored.
+
 - `declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' })`
 - `declare(sidebar => { profile => { name => 'Str', followers => 'Int' }, recent_entries => 'ArrayRef[My::Entry]' })`
-
-## Arrayref
-
-- These validate a arrayref structure recursively.
-- This is a ** exact ** match. All items and length will be validated.
-- `declare(pair => [ 'My::UserAccount', 'My::UserAccount' ])`
-- `declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ])`
 
 # OPTIONS
 
@@ -75,10 +79,11 @@ The type validation of this module is base on [Mouse::Util::TypeConstraints](htt
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
                 # defaults
-                method      => 'declare', # method name to export
-                validate    => 1,         # enable validation when truthy
-                print       => 'html',    # error output format ('html', 'text' or 'none')
-                on_mismatch => 'die',     # error handler ('die', 'warn' or 'none')
+                method         => 'declare', # method name to export
+                validate       => 1,         # enable validation when truthy
+                print          => 'html',    # error output format ('html', 'text' or 'none')
+                on_mismatch    => 'die',     # error handler ('die', 'warn' or 'none')
+                registry_class => undef,     # package name for specifying Type::Registry
             ]
         ]
     );
@@ -87,7 +92,7 @@ The type validation of this module is base on [Mouse::Util::TypeConstraints](htt
 
 ## Disable Validation on Production
 
-Perhaps you want to disable validation in production to prevent spoiling performance.
+Perhaps you want to disable validation in production to prevent spoiling performance on a [Plack](https://metacpan.org/pod/Plack) application.
 
     Text::Xslate->new(
         module => [
@@ -118,10 +123,11 @@ Lint with [Test::WWW::Mechanize](https://metacpan.org/pod/Test::WWW::Mechanize)
 
 # SEE ALSO
 
-- [Mouse::Util::TypeConstraints](https://metacpan.org/pod/Mouse::Util::TypeConstraints)
-- [Smart::Args](https://metacpan.org/pod/Smart::Args)
-- [Test::WWW::Mechanize](https://metacpan.org/pod/Test::WWW::Mechanize)
-- [Text::Xslate](https://metacpan.org/pod/Text::Xslate)
+[Text::Xslate](https://metacpan.org/pod/Text::Xslate), [Text::Xslate::Bridge](https://metacpan.org/pod/Text::Xslate::Bridge)
+
+[Type::Tiny](https://metacpan.org/pod/Type::Tiny), [Types::Standard](https://metacpan.org/pod/Types::Standard), [Type::Registry](https://metacpan.org/pod/Type::Registry)
+
+[Smart::Args](https://metacpan.org/pod/Smart::Args), [Test::WWW::Mechanize](https://metacpan.org/pod/Test::WWW::Mechanize)
 
 # LICENSE
 

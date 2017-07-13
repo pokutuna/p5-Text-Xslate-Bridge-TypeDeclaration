@@ -56,13 +56,13 @@ EOS
 };
 
 subtest 'none' => sub {
-    my $warned = 0;
+    my $died = 0;
 
     my $xslate = Text::Xslate->new(
         type         => 'html' ,
         path         => path,
         cache_dir    => cache_dir,
-        warn_handler => sub { $warned += 1},
+        die_handler => sub { $died += 1},
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
@@ -73,7 +73,7 @@ subtest 'none' => sub {
 
     my $res = $xslate->render('a.tx', { a => "hoge" });
     is $res, "hoge\n";
-    is $warned, 1;
+    is $died, 1;
 };
 
 done_testing;
