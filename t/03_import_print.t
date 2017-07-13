@@ -7,6 +7,30 @@ use Test::More;
 
 use Text::Xslate;
 
+subtest 'default(html)' => sub {
+    my $xslate = Text::Xslate->new(
+        path         => path,
+        cache_dir    => cache_dir,
+        warn_handler => sub {},
+
+        module => [
+            'Text::Xslate::Bridge::TypeDeclaration' => [
+                print => 1,
+            ],
+        ],
+    );
+
+    my $res = $xslate->render('a.tx', { a => "hoge" });
+    is $res, <<EOS;
+<pre class="type-declaration-mismatch">
+Declaration mismatch for `a`
+  declaration: &#39;Int&#39;
+        value: &#39;hoge&#39;
+</pre>
+hoge
+EOS
+};
+
 subtest 'html' => sub {
     my $xslate = Text::Xslate->new(
         type         => 'html',
@@ -16,7 +40,7 @@ subtest 'html' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'html',
+                print => 1,
             ],
         ],
     );
@@ -41,7 +65,7 @@ subtest 'text' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'text',
+                print => 1,
             ],
         ],
     );
@@ -55,7 +79,7 @@ hoge
 EOS
 };
 
-subtest 'none' => sub {
+subtest 'disabled' => sub {
     my $died = 0;
 
     my $xslate = Text::Xslate->new(
@@ -66,7 +90,7 @@ subtest 'none' => sub {
 
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
-                print => 'none',
+                print => 0,
             ],
         ],
     );
