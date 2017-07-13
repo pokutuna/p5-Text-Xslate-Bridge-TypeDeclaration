@@ -4,7 +4,6 @@ use warnings;
 use parent qw(Text::Xslate::Bridge);
 
 use Carp qw(croak);
-use Data::Dumper;
 use List::Util qw(all);
 use Scalar::Util qw(blessed);
 use Text::Xslate qw(mark_raw);
@@ -57,13 +56,9 @@ sub _declare_func {
             my $value = Text::Xslate->current_vars->{$key};
 
             unless ($type->check($value)) {
-                local $Data::Dumper::Terse    = 1;
-                local $Data::Dumper::Indent   = 0;
-                local $Data::Dumper::Maxdepth = 2;
-
-                my $msg = sprintf "Declaration mismatch for `%s`\n  declaration: %s\n        value: %s\n",
-                    $key, Dumper($declaration), Dumper($value);
-
+                my $msg = sprintf(
+                    "Declaration mismatch for `%s`\n  %s\n", $key, $type->get_message($value)
+                );
                 _print($msg) if $args->{print};
                 last if _on_mismatch($msg, $args->{on_mismatch});
             }
