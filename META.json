@@ -1,5 +1,5 @@
 {
-   "abstract" : "A Mouse-based Type Validator in Xslate.",
+   "abstract" : "A Type::Tiny based Type Validator in Xslate.",
    "author" : [
       "pokutuna <popopopopokutuna@gmail.com>"
    ],
@@ -45,6 +45,7 @@
             "Carp" : "0",
             "Data::Dumper" : "0",
             "List::Util" : "0",
+            "Scalar::Util" : "0",
             "Text::Xslate" : "0",
             "Text::Xslate::Bridge" : "0",
             "Type::Tiny" : "0",

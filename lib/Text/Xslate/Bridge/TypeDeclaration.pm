@@ -22,8 +22,8 @@ our $IMPORT_DEFAULT_ARGS = {
     method         => 'declare',
     validate       => 1,
     print          => 'html', # TODO: Can detect Xslate compiler_option
-    registry_class => undef,  # Class name for Type::Registry to lookup types
     on_mismatch    => 'die',  # Cannot give a subroutine reference >_<
+    registry_class => undef,  # Class name for Type::Registry to lookup types
 };
 
 sub export_into_xslate {
@@ -144,7 +144,7 @@ __END__
 
 =head1 NAME
 
-Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
+Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xslate.
 
 =head1 SYNOPSIS
 
@@ -180,29 +180,37 @@ Text::Xslate::Bridge::TypeDeclaration - A Mouse-based Type Validator in Xslate.
 
 Text::Xslate::Bridge::TypeDeclaration is a type validator module in L<Text::Xslate> templates.
 
-The type validation of this module is base on L<Mouse::Util::TypeConstraints>.
+The type validation of this module is base on L<Type::Tiny>.
+
+L<Type::Tiny> type constraints are compatible with Moo, Moose and Mouse.
 
 C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head1 DECLARATIONS
 
-=head2 Mouse Defaults
+=head2 Types::Standard
+
+See L<Types::Standard>.
+
+These are imported by default L<Text::Xslate::Bridge::TypeDeclaration::Registry>.
+
+You can not use them unless you import L<Types::Standard> with specifying registry by C<< registry_class >> option.
 
 =over 4
-
-=item These are provided by L<Mouse::Util::TypeConstraints>.
 
 =item C<< declare(name => 'Str') >>
 
 =item C<< declare(user_ids => 'ArrayRef[Int]') >>
 
+=item C<< declare(person_hash => 'Dict[name => Str, age => Int]') >>
+
 =back
 
-=head2 Object
+=head2 Class-Type
+
+These are defined by default L<Text::Xslate::Bridge::TypeDeclaration::Registry> when a name is not found in registry.
 
 =over 4
-
-=item These are defined by C<< find_or_create_isa_type_constraint >> when declared.
 
 =item C<< declare(engine => 'Text::Xslate') >>
 
@@ -212,11 +220,11 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =head2 Hashref
 
+Hashref is treated as C<<Dict[... slurpy Any]>>.
+
+This is a B< slurpy > match. Less value is error. Extra values are ignored.
+
 =over 4
-
-=item These validate a hashref structure recursively.
-
-=item This is a B< partial > match. Less value is error. Extra value is ignored.
 
 =item C<< declare(account_summary => { name => 'Str', subscriber_count => 'Int', icon => 'My::Image' }) >>
 
@@ -224,31 +232,17 @@ C<< declare >> interface was implemented with reference to L<Smart::Args>.
 
 =back
 
-=head2 Arrayref
-
-=over 4
-
-=item These validate a arrayref structure recursively.
-
-=item This is a B< exact > match. All items and length will be validated.
-
-=item C<< declare(pair => [ 'My::UserAccount', 'My::UserAccount' ]) >>
-
-=item C<< declare(args => [ 'Defined', 'Str', 'Maybe[Int]' ]) >>
-
-=back
-
-
 =head1 OPTIONS
 
     Text::Xslate->new(
         module => [
             'Text::Xslate::Bridge::TypeDeclaration' => [
                 # defaults
-                method      => 'declare', # method name to export
-                validate    => 1,         # enable validation when truthy
-                print       => 'html',    # error output format ('html', 'text' or 'none')
-                on_mismatch => 'die',     # error handler ('die', 'warn' or 'none')
+                method         => 'declare', # method name to export
+                validate       => 1,         # enable validation when truthy
+                print          => 'html',    # error output format ('html', 'text' or 'none')
+                on_mismatch    => 'die',     # error handler ('die', 'warn' or 'none')
+                registry_class => undef,     # package name for specifying Type::Registry
             ]
         ]
     );
@@ -290,17 +284,11 @@ Lint with L<Test::WWW::Mechanize>
 
 =head1 SEE ALSO
 
-=over
+L<Text::Xslate>, L<Text::Xslate::Bridge>
 
-=item L<Mouse::Util::TypeConstraints>
+L<Type::Tiny>, L<Types::Standard>, L<Type::Registry>
 
-=item L<Smart::Args>
-
-=item L<Test::WWW::Mechanize>
-
-=item L<Text::Xslate>
-
-=back
+L<Smart::Args>, L<Test::WWW::Mechanize>
 
 =head1 LICENSE
 
