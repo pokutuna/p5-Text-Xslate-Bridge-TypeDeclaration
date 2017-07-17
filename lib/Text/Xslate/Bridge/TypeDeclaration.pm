@@ -140,7 +140,7 @@ __END__
 
 =head1 NAME
 
-Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xslate.
+Text::Xslate::Bridge::TypeDeclaration - A Type Validator in Xslate.
 
 =head1 SYNOPSIS
 
@@ -149,23 +149,32 @@ Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xsl
     );
 
     # @@ template.tx
-    # <:- declare(drink => 'Enum["Cocoa", "Cappuchino", "Tea"]') -:>
-    # May I have a cup of <: $drink :>.
+    # <:- declare(
+    #   user  => 'Some::Model::User',
+    #   drink => 'Enum["Cocoa", "Cappuchino", "Tea"]'
+    # ) -:>
+    # <: user.name :> is drinking a cup of <: $drink :>.
 
     # Success!
-    $xslate->render('template.tx', { drink => 'Cocoa' });
+    $xslate->render('template.tx', {
+        user  => Some::Model::User->new(name => 'pokutuna'),
+        drink => 'Cocoa',
+    });
     # Output:
-    #   May I have a cup of Cocoa.
+    #   pokutuna is drinking a cup of Cocoa.
 
 
     # A string 'Oil' is not a drink
-    is $xslate->render('template.tx', { drink => 'Oil' });
+    $xslate->render('template.tx', {
+        user  => Some::Model::User->new(name => 'pokutuna'),
+        drink => 'Oil',
+    });
     # Output:
     #   <pre class="type-declaration-mismatch">
     #   Declaration mismatch for `drink`
     #     Value "Oil" did not pass type constraint "Enum["Cocoa", "Cappuchino", "Tea"]"
     #   </pre>
-    #   May I have a cup of Oil.
+    #   pokutuna is drinking a cup of Oil.
 
 =head1 DESCRIPTION
 
