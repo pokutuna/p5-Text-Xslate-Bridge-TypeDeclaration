@@ -2,6 +2,9 @@ Revision history for Perl extension Text-Xslate-Bridge-TypeDeclaration
 
 {{$NEXT}}
 
+0.11 2017-07-17T08:20:48Z
+    - Update POD
+
 0.10 2017-07-17T06:15:04Z
     [BREAKING RELEASE]
     - Using Type::Tiny in #3.
