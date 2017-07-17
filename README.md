@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration.svg?branch=master)](https://travis-ci.org/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration) [![Coverage Status](https://img.shields.io/coveralls/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration/master.svg?style=flat)](https://coveralls.io/r/pokutuna/p5-Text-Xslate-Bridge-TypeDeclaration?branch=master)
 # NAME
 
-Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xslate.
+Text::Xslate::Bridge::TypeDeclaration - A Type Validator in Xslate.
 
 # SYNOPSIS
 
@@ -10,43 +10,54 @@ Text::Xslate::Bridge::TypeDeclaration - A Type::Tiny based Type Validator in Xsl
     );
 
     # @@ template.tx
-    # <:- declare(drink => 'Enum["Cocoa", "Cappuchino", "Tea"]') -:>
-    # May I have a cup of <: $drink :>.
+    # <:- declare(
+    #   user  => 'Some::Model::User',
+    #   drink => 'Enum["Cocoa", "Cappuchino", "Tea"]'
+    # ) -:>
+    # <: user.name :> is drinking a cup of <: $drink :>.
 
     # Success!
-    $xslate->render('template.tx', { drink => 'Cocoa' });
+    $xslate->render('template.tx', {
+        user  => Some::Model::User->new(name => 'pokutuna'),
+        drink => 'Cocoa',
+    });
     # Output:
-    #   May I have a cup of Cocoa.
+    #   pokutuna is drinking a cup of Cocoa.
 
 
     # A string 'Oil' is not a drink
-    is $xslate->render('template.tx', { drink => 'Oil' });
+    $xslate->render('template.tx', {
+        user  => Some::Model::User->new(name => 'pokutuna'),
+        drink => 'Oil',
+    });
     # Output:
     #   <pre class="type-declaration-mismatch">
     #   Declaration mismatch for `drink`
     #     Value "Oil" did not pass type constraint "Enum["Cocoa", "Cappuchino", "Tea"]"
     #   </pre>
-    #   May I have a cup of Oil.
+    #   pokutuna is drinking a cup of Oil.
 
 # DESCRIPTION
 
-Text::Xslate::Bridge::TypeDeclaration is a type validator module in [Text::Xslate](https://metacpan.org/pod/Text::Xslate) templates.
+Text::Xslate::Bridge::TypeDeclaration is a type validator module for [Text::Xslate](https://metacpan.org/pod/Text::Xslate) templates.
 
-The type validation of this module is base on [Type::Tiny](https://metacpan.org/pod/Type::Tiny).
+Type validation of this module is base on [Type::Tiny](https://metacpan.org/pod/Type::Tiny).
 
 [Type::Tiny](https://metacpan.org/pod/Type::Tiny) type constraints are compatible with Moo, Moose and Mouse.
 
-`declare` interface was implemented with reference to [Smart::Args](https://metacpan.org/pod/Smart::Args).
+You can use this even if you do not use these type libraries.
+
+If the library-based type is not found, treats as a class type of the name.
 
 # DECLARATIONS
+
+This module looks for a type name that was written in the template from [Text::Xslate::Bridge::TypeDeclaration::Registry](https://metacpan.org/pod/Text::Xslate::Bridge::TypeDeclaration::Registry) by default.
+
+The following behaviors can be replaced by specifying the registry in `registry_class_name` option.
 
 ## Types::Standard
 
 See [Types::Standard](https://metacpan.org/pod/Types::Standard).
-
-These are imported by default [Text::Xslate::Bridge::TypeDeclaration::Registry](https://metacpan.org/pod/Text::Xslate::Bridge::TypeDeclaration::Registry).
-
-You can not use them unless you import [Types::Standard](https://metacpan.org/pod/Types::Standard) with specifying registry by `registry_class` option.
 
 - `declare(name => 'Str')`
 - `declare(user_ids => 'ArrayRef[Int]')`
@@ -54,7 +65,7 @@ You can not use them unless you import [Types::Standard](https://metacpan.org/po
 
 ## Class-Type
 
-These are defined by default [Text::Xslate::Bridge::TypeDeclaration::Registry](https://metacpan.org/pod/Text::Xslate::Bridge::TypeDeclaration::Registry) when a name is not found in registry.
+It will be treated as a class type when a type of the given name is not found.
 
 - `declare(engine => 'Text::Xslate')`
 - `declare(visitor => 'Maybe[My::Model::UserAccount]')`

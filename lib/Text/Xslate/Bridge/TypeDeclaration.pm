@@ -178,23 +178,26 @@ Text::Xslate::Bridge::TypeDeclaration - A Type Validator in Xslate.
 
 =head1 DESCRIPTION
 
-Text::Xslate::Bridge::TypeDeclaration is a type validator module in L<Text::Xslate> templates.
+Text::Xslate::Bridge::TypeDeclaration is a type validator module for L<Text::Xslate> templates.
 
-The type validation of this module is base on L<Type::Tiny>.
+Type validation of this module is base on L<Type::Tiny>.
 
 L<Type::Tiny> type constraints are compatible with Moo, Moose and Mouse.
 
-C<< declare >> interface was implemented with reference to L<Smart::Args>.
+You can use this even if you do not use these type libraries.
+
+If the library-based type is not found, treats as a class type of the name.
+
 
 =head1 DECLARATIONS
+
+This module looks for a type name that was written in the template from L<Text::Xslate::Bridge::TypeDeclaration::Registry> by default.
+
+The following behaviors can be replaced by specifying the registry in C<registry_class_name> option.
 
 =head2 Types::Standard
 
 See L<Types::Standard>.
-
-These are imported by default L<Text::Xslate::Bridge::TypeDeclaration::Registry>.
-
-You can not use them unless you import L<Types::Standard> with specifying registry by C<< registry_class >> option.
 
 =over 4
 
@@ -208,7 +211,7 @@ You can not use them unless you import L<Types::Standard> with specifying regist
 
 =head2 Class-Type
 
-These are defined by default L<Text::Xslate::Bridge::TypeDeclaration::Registry> when a name is not found in registry.
+It will be treated as a class type when a type of the given name is not found.
 
 =over 4
 
