@@ -1,7 +1,7 @@
 requires 'perl', '5.008001';
 
 requires 'Carp';
-requires 'List::Util';
+requires 'List::MoreUtils';
 requires 'Scalar::Util';
 requires 'Text::Xslate';
 requires 'Text::Xslate::Bridge';
