@@ -43,7 +43,7 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
-            "List::Util" : "0",
+            "List::MoreUtils" : "0",
             "Scalar::Util" : "0",
             "Text::Xslate" : "0",
             "Text::Xslate::Bridge" : "0",

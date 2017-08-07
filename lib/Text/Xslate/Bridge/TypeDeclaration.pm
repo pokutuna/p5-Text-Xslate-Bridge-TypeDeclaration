@@ -4,7 +4,7 @@ use warnings;
 use parent qw(Text::Xslate::Bridge);
 
 use Carp qw(croak);
-use List::Util qw(all);
+use List::MoreUtils qw(all);
 use Scalar::Util qw(blessed);
 use Text::Xslate qw(mark_raw);
 use Text::Xslate::Bridge::TypeDeclaration::Registry;
