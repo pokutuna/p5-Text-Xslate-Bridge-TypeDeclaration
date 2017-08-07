@@ -12,7 +12,7 @@ use Type::Registry ();
 use Type::Tiny qw();
 use Types::Standard qw(Any Dict slurpy);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12_1';
 
 # Set truthy value to skip validation for local scope.
 our $DISABLE_VALIDATION = 0;
