@@ -5,7 +5,7 @@ requires 'List::MoreUtils';
 requires 'Scalar::Util';
 requires 'Text::Xslate';
 requires 'Text::Xslate::Bridge';
-requires 'Type::Tiny';
+requires 'Type::Tiny', '>= 1.002';
 requires 'Type::Tiny::XS';
 
 on 'test' => sub {

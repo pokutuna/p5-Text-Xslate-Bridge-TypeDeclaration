@@ -47,7 +47,7 @@
             "Scalar::Util" : "0",
             "Text::Xslate" : "0",
             "Text::Xslate::Bridge" : "0",
-            "Type::Tiny" : "0",
+            "Type::Tiny" : "1.002",
             "Type::Tiny::XS" : "0",
             "perl" : "5.008001"
          }
