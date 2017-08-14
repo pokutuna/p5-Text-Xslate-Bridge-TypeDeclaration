@@ -2,6 +2,9 @@ Revision history for Perl extension Text-Xslate-Bridge-TypeDeclaration
 
 {{$NEXT}}
 
+0.13 2017-08-14T06:44:08Z
+    - Set `display_name` to types for descriptive errors.
+
 0.12_1 2017-08-07T07:52:37Z
     - Fix module dependencies
 
