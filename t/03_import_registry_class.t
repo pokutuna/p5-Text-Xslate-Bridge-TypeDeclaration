@@ -62,7 +62,7 @@ subtest 't::SomeModel' => sub {
     my @arg = ('somemodel.tx', { value => t::SomeModel->new });
     unlike $default->render(@arg),   qr/Declaration mismatch for `value`/, 't::SomeModel generated';
     like   $specified->render(@arg), qr/Declaration mismatch for `value`/, 'Not generate';
-    like   $specified->render(@arg), qr/\Q"t::SomeModel" is not a known type\E/
+    like   $specified->render(@arg), qr/\Q"t::SomeModel" is not a known type\E/;
 };
 
 subtest 'My::Registry::SomeModel' => sub {
@@ -70,6 +70,20 @@ subtest 'My::Registry::SomeModel' => sub {
     like   $default->render(@arg),   qr/Declaration mismatch for `value`/, 'Not aliased';
     like   $default->render(@arg),   qr/\QReference bless( {}, 't::SomeModel' ) did not pass type constraint (not isa My::Registry::SomeModel)\E/;
     unlike $specified->render(@arg), qr/Declaration mismatch for `value`/, 'From t::My::Registry';
+};
+
+subtest 'Parameterized' => sub {
+    my @arg = ('parameterized.tx', { value => [t::OneModel->new, t::OneModel->new] });
+    unlike $default->render(@arg),   qr/Declaration mismatch for `value`/, 't::OneModel generated in a ArrayRef';
+    like   $specified->render(@arg), qr/Declaration mismatch for `value`/, 'Not generate';
+    like   $specified->render(@arg), qr/\Q"ArrayRef[t::OneModel]" is not a known type\E/;
+};
+
+subtest 'Hash structured' => sub {
+    my @arg = ('hash_structure.tx', { value => { m => t::AnotherModel->new } });
+    unlike $default->render(@arg),   qr/Declaration mismatch for `value`/, 't::AnotherModel generated';
+    like   $specified->render(@arg), qr/Declaration mismatch for `value`/, 'Not generate';
+    like   $specified->render(@arg), qr/\Qdid not pass type constraint "Dict[m=>"t::AnotherModel",slurpy Any]"\E/;
 };
 
 subtest 'invalid type' => sub {
@@ -97,6 +111,12 @@ __DATA__
 
 @@ aliased_somemodel.tx
 <: declare(value => 'My::Registry::SomeModel'):><: $value :>
+
+@@ parameterized.tx
+<: declare(value => 'ArrayRef[t::OneModel]'):><: $value[0] :>
+
+@@ hash_structure.tx
+<: declare(value => { m => 't::AnotherModel' }):><: $value["m"] :>
 
 @@ invalid_type.tx
 <: declare(value => ''):><: $value :>
