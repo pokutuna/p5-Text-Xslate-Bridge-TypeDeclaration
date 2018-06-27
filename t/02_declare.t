@@ -41,6 +41,22 @@ Declaration mismatch for `h`
 i:, h.s:
 EOS
 
+is $xslate->render('optional.tx', { profile => { name => 'pokutuna', age => 30 } }), <<EOS;
+pokutuna(30)
+EOS
+
+is $xslate->render('optional.tx', { profile => { name => 'oneetyan' } }), <<EOS;
+oneetyan(unknown)
+EOS
+
+is $xslate->render('optional.tx', { profile => { name => 'oneetyan', age => undef } }), <<EOS;
+<pre class="type-declaration-mismatch">
+Declaration mismatch for `profile`
+  Reference {&quot;age&quot; =&gt; undef,&quot;name&quot; =&gt; &quot;oneetyan&quot;} did not pass type constraint &quot;Dict[age=&gt;Optional[Int],name=&gt;Str,slurpy Any]&quot;
+</pre>
+oneetyan(unknown)
+EOS
+
 is $xslate->render('structured_type_not_found.tx', { foo => { bar => 1 }}), <<EOS;
 <pre class="type-declaration-mismatch">
 Declaration mismatch for `foo`
@@ -58,6 +74,9 @@ __DATA__
 @@ two.tx
 <: declare(i => 'Maybe[Int]', h => { s => 'Maybe[Str]' }) -:>
 i:<: $i :>, h.s:<: $h.s :>
+@@ optional.tx
+<: declare(profile => { name => 'Str', age => 'Optional[Int]' }) -:>
+<: $profile.name :>(<: $profile.age ? $profile.age : 'unknown' :>)
 @@ structured_type_not_found.tx
 <: declare(foo => { bar => 'SomeCollection[Any]' }) -:>
 foo.bar:<: $foo.bar :>
