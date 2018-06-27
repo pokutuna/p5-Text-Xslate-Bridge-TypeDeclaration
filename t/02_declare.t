@@ -16,12 +16,9 @@ my $xslate = Text::Xslate->new(
 
 is $xslate->render('one.tx', { name => 'cocoa', age => 15 }), "cocoa(15)\n";
 
-is $xslate->render('one.tx', { name => 'chino', age => 'tippy' }), <<EOS;
-<pre class="type-declaration-mismatch">
+cmp_error_body $xslate->render('one.tx', { name => 'chino', age => 'tippy' }), <<EOS;
 Declaration mismatch for `age`
-  Value &quot;tippy&quot; did not pass type constraint &quot;Int&quot;
-</pre>
-chino(tippy)
+  Value "tippy" did not pass type constraint "Int"
 EOS
 
 is $xslate->render('two.tx', { i => 123, h => { s => 'hoge' }}),
@@ -33,12 +30,9 @@ is $xslate->render('two.tx', { h => { s => 'hoge' } }),
 is $xslate->render('two.tx', { h => { s => undef } }),
     "i:, h.s:\n";
 
-is $xslate->render('two.tx', {}), <<EOS;
-<pre class="type-declaration-mismatch">
+cmp_error_body $xslate->render('two.tx', {}), <<EOS;
 Declaration mismatch for `h`
-  Undef did not pass type constraint &quot;Dict[s=&gt;Maybe[Str],slurpy Any]&quot;
-</pre>
-i:, h.s:
+  Undef did not pass type constraint "Dict[s=>Maybe[Str],slurpy Any]"
 EOS
 
 is $xslate->render('optional.tx', { profile => { name => 'pokutuna', age => 30 } }), <<EOS;
@@ -49,20 +43,14 @@ is $xslate->render('optional.tx', { profile => { name => 'oneetyan' } }), <<EOS;
 oneetyan(unknown)
 EOS
 
-is $xslate->render('optional.tx', { profile => { name => 'oneetyan', age => undef } }), <<EOS;
-<pre class="type-declaration-mismatch">
+cmp_error_body $xslate->render('optional.tx', { profile => { name => 'oneetyan', age => undef } }), <<EOS;
 Declaration mismatch for `profile`
-  Reference {&quot;age&quot; =&gt; undef,&quot;name&quot; =&gt; &quot;oneetyan&quot;} did not pass type constraint &quot;Dict[age=&gt;Optional[Int],name=&gt;Str,slurpy Any]&quot;
-</pre>
-oneetyan(unknown)
+  Reference {"age" => undef,"name" => "oneetyan"} did not pass type constraint "Dict[age=>Optional[Int],name=>Str,slurpy Any]"
 EOS
 
-is $xslate->render('structured_type_not_found.tx', { foo => { bar => 1 }}), <<EOS;
-<pre class="type-declaration-mismatch">
+cmp_error_body $xslate->render('structured_type_not_found.tx', { foo => { bar => 1 }}), <<EOS;
 Declaration mismatch for `foo`
-  Reference {&quot;bar&quot; =&gt; 1} did not pass type constraint &quot;Dict[bar=&gt;&quot;SomeCollection[Any]&quot;,slurpy Any]&quot;
-</pre>
-foo.bar:1
+  Reference {"bar" => 1} did not pass type constraint "Dict[bar=>"SomeCollection[Any]",slurpy Any]"
 EOS
 
 done_testing;

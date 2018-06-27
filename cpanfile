@@ -17,4 +17,5 @@ on 'test' => sub {
     requires 'Test::Fatal';
     requires 'Test::More', '0.98';
     requires 'Test::Name::FromLine';
+    requires 'HTML::Entities';
 };
