@@ -34,12 +34,9 @@ my $xslate = Text::Xslate->new(
     local $@;
     my $res = eval { $xslate->render('two.tx', { num => 'hoge' }) };
     is $@, '';
-    is $res, <<EOS;
-<pre class="type-declaration-mismatch">
+    cmp_error_body $res, <<EOS;
 Declaration mismatch for `num`
-  Value &quot;hoge&quot; did not pass type constraint &quot;Int&quot;
-</pre>
-hoge
+  Value "hoge" did not pass type constraint "Int"
 EOS
 }
 
