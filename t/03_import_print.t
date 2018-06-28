@@ -21,12 +21,9 @@ subtest 'default(html)' => sub {
     );
 
     my $res = $xslate->render('a.tx', { a => "hoge" });
-    is $res, <<EOS;
-<pre class="type-declaration-mismatch">
+    cmp_error_body $res, <<EOS;
 Declaration mismatch for `a`
-  Value &quot;hoge&quot; did not pass type constraint &quot;Int&quot;
-</pre>
-hoge
+  Value "hoge" did not pass type constraint "Int"
 EOS
 };
 
@@ -43,14 +40,10 @@ subtest 'html' => sub {
             ],
         ],
     );
-
     my $res = $xslate->render('a.tx', { a => "hoge" });
-    is $res, <<EOS;
-<pre class="type-declaration-mismatch">
+    cmp_error_body $res, <<EOS;
 Declaration mismatch for `a`
-  Value &quot;hoge&quot; did not pass type constraint &quot;Int&quot;
-</pre>
-hoge
+  Value "hoge" did not pass type constraint "Int"
 EOS
 };
 

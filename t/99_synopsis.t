@@ -29,15 +29,12 @@ is $xslate->render('template.tx', +{
 pokutuna is drinking a cup of Cocoa.
 EOS
 
-is $xslate->render('template.tx', +{
+cmp_error_body $xslate->render('template.tx', +{
     user  => Some::Model::User->new(name => 'pokutuna'),
     drink => 'Oil',
 }), <<EOS;
-<pre class="type-declaration-mismatch">
 Declaration mismatch for `drink`
-  Value &quot;Oil&quot; did not pass type constraint &quot;Enum[&quot;Cocoa&quot;,&quot;Cappuchino&quot;,&quot;Tea&quot;]&quot;
-</pre>
-pokutuna is drinking a cup of Oil.
+  Value "Oil" did not pass type constraint "Enum["Cocoa","Cappuchino","Tea"]"
 EOS
 
 done_testing;
