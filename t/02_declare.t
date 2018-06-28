@@ -21,6 +21,7 @@ Declaration mismatch for `age`
   Value "tippy" did not pass type constraint "Int"
 EOS
 
+
 is $xslate->render('two.tx', { i => 123, h => { s => 'hoge' }}),
     "i:123, h.s:hoge\n";
 
@@ -35,6 +36,7 @@ Declaration mismatch for `h`
   Undef did not pass type constraint "Dict[s=>Maybe[Str],slurpy Any]"
 EOS
 
+
 is $xslate->render('optional.tx', { profile => { name => 'pokutuna', age => 30 } }), <<EOS;
 pokutuna(30)
 EOS
@@ -47,6 +49,14 @@ cmp_error_body $xslate->render('optional.tx', { profile => { name => 'oneetyan',
 Declaration mismatch for `profile`
   Reference {"age" => undef,"name" => "oneetyan"} did not pass type constraint "Dict[age=>Optional[Int],name=>Str,slurpy Any]"
 EOS
+
+# https://metacpan.org/pod/Types::Standard#Optional[%60a]
+# > Note that any use of Optional[`a] outside the context of parameterized Dict and Tuple type constraints makes little sense, and its behaviour is undefined.
+cmp_error_body $xslate->render('bare_optional.tx', { name => 'oneetyan' }), <<EOS;
+Declaration mismatch for `age`
+  Undef did not pass type constraint "Optional[Int]"
+EOS
+
 
 cmp_error_body $xslate->render('structured_type_not_found.tx', { foo => { bar => 1 }}), <<EOS;
 Declaration mismatch for `foo`
@@ -65,6 +75,9 @@ i:<: $i :>, h.s:<: $h.s :>
 @@ optional.tx
 <: declare(profile => { name => 'Str', age => 'Optional[Int]' }) -:>
 <: $profile.name :>(<: $profile.age ? $profile.age : 'unknown' :>)
+@@ bare_optional.tx
+<: declare(name => 'Str', age => 'Optional[Int]') -:>
+<: $name :>(<: $age ? $age : 'unknown' :>)
 @@ structured_type_not_found.tx
 <: declare(foo => { bar => 'SomeCollection[Any]' }) -:>
 foo.bar:<: $foo.bar :>
